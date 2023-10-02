@@ -7,7 +7,7 @@ import dollar from "@/public/icon-dollar.svg";
 export default function Calculator() {
   const [bill, setBill] = useState(0);
   const [tip, setTip] = useState(0);
-  const [customTip, setCustomTip] = useState(0);
+  const [customTip, setCustomTip] = useState("");
   const [people, setPeople] = useState(1);
   const [tipAmount, setTipAmount] = useState(0);
   const [total, setTotal] = useState(0);
@@ -15,45 +15,32 @@ export default function Calculator() {
 
   // Calculate tip and total whenever bill, tip, customTip, or people change
   useEffect(() => {
-    if(isNaN(people)){
-      setPeople(1)
+    
+    if (isNaN(people)) {
+      setPeople(1);
     }
-    if (people > 0) {
-      if ((customTip) == 0) {
-        const calculatedTipAmount = bill / people;
-        const calculatedTotal = bill / people + calculatedTipAmount;
+    if (isNaN(bill)) {
+      setBill(0);
+    }
+    if (tip == 0) {
+      const calculatedTipAmount = bill / people;
+      const calculatedTotal = bill / people + calculatedTipAmount;
 
-        setTipAmount(calculatedTipAmount);
-        setTotal(calculatedTotal);
-      } else {
-        const calculatedTipAmount = (bill * (customTip || tip)) / 100 / people;
-        const calculatedTotal = bill / people + calculatedTipAmount;
-
-        setTipAmount(calculatedTipAmount);
-        setTotal(calculatedTotal);
-      }
-      const calculatedTipAmount = (bill * (customTip || tip)) / 100 / people;
+      setTipAmount(calculatedTipAmount);
+      setTotal(calculatedTotal);
+    } else {
+      const calculatedTipAmount = (bill * (tip)) / 100 / people;
       const calculatedTotal = bill / people + calculatedTipAmount;
 
       setTipAmount(calculatedTipAmount);
       setTotal(calculatedTotal);
     }
-  }, [bill, customTip, people, tip]);
+  }, [bill, people, tip]);
 
-
-  function calculateTip(){
-    
-  }
 
   // Handle input change for bill
   const handleBillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBill(parseFloat(e.target.value));
-  };
-
-  // Handle input change for custom tip
-  const handleCustomTipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedTipPercentage(null);
-    setCustomTip(parseFloat(e.target.value));
   };
 
   // Handle input change for number of people
@@ -62,15 +49,25 @@ export default function Calculator() {
   };
 
   const handleTipButtonClick = (percentage: number) => {
+    console.log("button tip is "+percentage);
     setTip(percentage);
-    setSelectedTipPercentage(percentage);
+    setCustomTip("")
+  };
+
+  // Handle input change for custom tip
+  const handleCustomTipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Custom Tip is " + e.target.value);
+    
+    setSelectedTipPercentage(null);
+    setTip(parseFloat(e.target.value));
+    setCustomTip(e.target.value)
   };
 
   // Reset all values
   const resetValues = () => {
-    setBill(0);
+    setBill(null);
     setTip(0);
-    setCustomTip(0);
+    setCustomTip("");
     setPeople(1);
     setTipAmount(0);
     setTotal(0);
@@ -115,6 +112,7 @@ export default function Calculator() {
             placeholder="Custom"
             className="text-dark-cyan bg-very-light-grayish-cyan rounded-lg text-center"
             onChange={handleCustomTipChange}
+            value={customTip}
           />
         </div>
       </div>
