@@ -1,42 +1,81 @@
 "use client";
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useState } from "react";
-
 import person from "@/public/icon-person.svg";
 import dollar from "@/public/icon-dollar.svg";
 
-export default function Calculater() {
+export default function Calculator() {
   const [bill, setBill] = useState(0);
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState(0);
   const [people, setPeople] = useState(1);
   const [tipAmount, setTipAmount] = useState(0);
   const [total, setTotal] = useState(0);
+  const [selectedTipPercentage, setSelectedTipPercentage] = useState(null);
 
-  function calculateTip() {
-    if (bill == null || tip == null || people == null || tipAmount == null) {
-      console.log("Error");
-    } else {
-      console.log(bill);
-      console.log(tip);
-      console.log(people);
-      console.log(tipAmount);
-      console.log(total);
-
-      setTipAmount((bill * tip) / 100 / people);
-      setTotal(bill / people + tipAmount);
+  // Calculate tip and total whenever bill, tip, customTip, or people change
+  useEffect(() => {
+    if(isNaN(people)){
+      setPeople(1)
     }
+    if (people > 0) {
+      if ((customTip) == 0) {
+        const calculatedTipAmount = bill / people;
+        const calculatedTotal = bill / people + calculatedTipAmount;
+
+        setTipAmount(calculatedTipAmount);
+        setTotal(calculatedTotal);
+      } else {
+        const calculatedTipAmount = (bill * (customTip || tip)) / 100 / people;
+        const calculatedTotal = bill / people + calculatedTipAmount;
+
+        setTipAmount(calculatedTipAmount);
+        setTotal(calculatedTotal);
+      }
+      const calculatedTipAmount = (bill * (customTip || tip)) / 100 / people;
+      const calculatedTotal = bill / people + calculatedTipAmount;
+
+      setTipAmount(calculatedTipAmount);
+      setTotal(calculatedTotal);
+    }
+  }, [bill, customTip, people, tip]);
+
+
+  function calculateTip(){
+    
   }
 
-  function resetValues() {
+  // Handle input change for bill
+  const handleBillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBill(parseFloat(e.target.value));
+  };
+
+  // Handle input change for custom tip
+  const handleCustomTipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedTipPercentage(null);
+    setCustomTip(parseFloat(e.target.value));
+  };
+
+  // Handle input change for number of people
+  const handlePeopleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPeople(parseInt(e.target.value));
+  };
+
+  const handleTipButtonClick = (percentage: number) => {
+    setTip(percentage);
+    setSelectedTipPercentage(percentage);
+  };
+
+  // Reset all values
+  const resetValues = () => {
     setBill(0);
     setTip(0);
+    setCustomTip(0);
     setPeople(1);
     setTipAmount(0);
     setTotal(0);
-  }
+    setSelectedTipPercentage(null);
+  };
 
   return (
     <div className="flex flex-col gap-10 bg-white rounded-t-3xl text-grayish-cyan text-left p-8 text-xl font-bold">
@@ -52,50 +91,31 @@ export default function Calculater() {
           type="number"
           placeholder="0"
           className="bg-very-light-grayish-cyan p-4 text-dark-cyan text-right text-2xl rounded-md"
-        ></input>
+          onChange={handleBillChange}
+        />
       </div>
       <div className="flex flex-col relative gap-4">
         <label>Select Tip %</label>
         <div className="grid grid-cols-2 gap-6 text-2xl">
-          <button
-            onClick={() => setTip(5)}
-            className="px-4 py-4 rounded-lg text-white bg-dark-cyan hover:bg-strong-cyan hover:text-dark-cyan selection:bg-strong-cyan selection:text-dark-cyan"
-          >
-            5%
-          </button>
-          <button
-            onClick={() => setTip(10)}
-            className="px-4 py-4 rounded-lg text-white bg-dark-cyan hover:bg-strong-cyan hover:text-dark-cyan selection:bg-strong-cyan selection:text-dark-cyan"
-          >
-            10%
-          </button>
-          <button
-            onClick={() => setTip(15)}
-            className="px-4 py-4 rounded-lg text-white bg-dark-cyan hover:bg-strong-cyan hover:text-dark-cyan selection:bg-strong-cyan selection:text-dark-cyan"
-          >
-            15%
-          </button>
-          <button
-            onClick={() => setTip(25)}
-            className="px-4 py-4 rounded-lg text-white bg-dark-cyan hover:bg-strong-cyan hover:text-dark-cyan selection:bg-strong-cyan selection:text-dark-cyan"
-          >
-            25%
-          </button>
-          <button
-            onClick={() => setTip(50)}
-            className="px-4 py-4 rounded-lg text-white bg-dark-cyan hover:bg-strong-cyan hover:text-dark-cyan selection:bg-strong-cyan selection:text-dark-cyan"
-          >
-            50%
-          </button>
+          {[5, 10, 15, 25, 50].map((tipPercentage) => (
+            <button
+              key={tipPercentage}
+              onClick={() => handleTipButtonClick(tipPercentage)}
+              className={`px-4 py-4 rounded-lg text-white ${
+                selectedTipPercentage === tipPercentage
+                  ? "bg-strong-cyan text-dark-cyan"
+                  : "bg-dark-cyan hover:bg-strong-cyan hover:text-dark-cyan"
+              } selection:bg-strong-cyan selection:text-dark-cyan`}
+            >
+              {tipPercentage}%
+            </button>
+          ))}
           <input
             type="number"
             placeholder="Custom"
             className="text-dark-cyan bg-very-light-grayish-cyan rounded-lg text-center"
-            value={customTip}
-            onChange={() => {
-              setCustomTip(customTip);
-            }}
-          ></input>
+            onChange={handleCustomTipChange}
+          />
         </div>
       </div>
       <div className="flex flex-col relative gap-4">
@@ -108,10 +128,10 @@ export default function Calculater() {
         />
         <input
           type="number"
-          placeholder="0"
+          placeholder="1"
           className="bg-very-light-grayish-cyan p-4 text-dark-cyan text-right text-2xl rounded-md"
-          onChange={calculateTip}
-        ></input>
+          onChange={handlePeopleChange}
+        />
       </div>
       <div className="flex flex-col bg-dark-cyan rounded-xl p-6 gap-4">
         <div className="flex flex-row justify-between">
@@ -119,17 +139,19 @@ export default function Calculater() {
             <span className="text-white">Tip Amount</span>
             <span className="text-sm">/ person</span>
           </section>
-          <span className="text-strong-cyan text-2xl">${tipAmount}</span>
+          <span className="text-strong-cyan text-2xl">
+            ${tipAmount.toFixed(2)}
+          </span>
         </div>
         <div className="flex flex-row justify-between">
           <section className="flex flex-col">
             <span className="text-white">Total</span>
             <span className="text-sm">/ person</span>
           </section>
-          <span className="text-strong-cyan text-2xl">${total}</span>
+          <span className="text-strong-cyan text-2xl">${total.toFixed(2)}</span>
         </div>
         <button
-          className="px-4 py-4 rounded-lg text-2xl uppercase text-dark-cyan bg-strong-cyan hover:bg-dark-cyan hover:text-strong-cyan"
+          className="px-4 py-4 rounded-lg text-2xl uppercase text-dark-cyan bg-strong-cyan hover:bg-very-light-grayish-cyan hover:text-strong-cyan"
           onClick={resetValues}
         >
           reset
