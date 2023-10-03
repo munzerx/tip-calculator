@@ -15,7 +15,6 @@ export default function Calculator() {
 
   // Calculate tip and total whenever bill, tip, customTip, or people change
   useEffect(() => {
-    
     if (isNaN(people)) {
       setPeople(1);
     }
@@ -29,14 +28,13 @@ export default function Calculator() {
       setTipAmount(calculatedTipAmount);
       setTotal(calculatedTotal);
     } else {
-      const calculatedTipAmount = (bill * (tip)) / 100 / people;
+      const calculatedTipAmount = (bill * tip) / 100 / people;
       const calculatedTotal = bill / people + calculatedTipAmount;
 
       setTipAmount(calculatedTipAmount);
       setTotal(calculatedTotal);
     }
-  }, [bill, people, tip]);
-
+  }, [bill, people, tip, selectedTipPercentage]);
 
   // Handle input change for bill
   const handleBillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,18 +47,19 @@ export default function Calculator() {
   };
 
   const handleTipButtonClick = (percentage: number) => {
-    console.log("button tip is "+percentage);
+    console.log("button tip is " + percentage);
     setTip(percentage);
-    setCustomTip("")
+    setSelectedTipPercentage(percentage);
+    setCustomTip("");
   };
 
   // Handle input change for custom tip
   const handleCustomTipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("Custom Tip is " + e.target.value);
-    
-    setSelectedTipPercentage(null);
+
+    setSelectedTipPercentage(0);
     setTip(parseFloat(e.target.value));
-    setCustomTip(e.target.value)
+    setCustomTip(e.target.value);
   };
 
   // Reset all values
@@ -75,78 +74,85 @@ export default function Calculator() {
   };
 
   return (
-    <div className="flex flex-col gap-10 bg-white rounded-t-3xl text-grayish-cyan text-left p-8 text-xl font-bold">
-      <div className="flex flex-col relative gap-4">
-        <label>Bill</label>
-        <Image
-          alt=""
-          src={dollar}
-          width={30}
-          className="absolute inset-y-12 left-0 pl-2 py-3 flex items-center text-grayish-cyan"
-        />
-        <input
-          type="number"
-          placeholder="0"
-          className="bg-very-light-grayish-cyan p-4 text-dark-cyan text-right text-2xl rounded-md"
-          onChange={handleBillChange}
-        />
-      </div>
-      <div className="flex flex-col relative gap-4">
-        <label>Select Tip %</label>
-        <div className="grid grid-cols-2 gap-6 text-2xl">
-          {[5, 10, 15, 25, 50].map((tipPercentage) => (
-            <button
-              key={tipPercentage}
-              onClick={() => handleTipButtonClick(tipPercentage)}
-              className={`px-4 py-4 rounded-lg text-white ${
-                selectedTipPercentage === tipPercentage
-                  ? "bg-strong-cyan text-dark-cyan"
-                  : "bg-dark-cyan hover:bg-strong-cyan hover:text-dark-cyan"
-              } selection:bg-strong-cyan selection:text-dark-cyan`}
-            >
-              {tipPercentage}%
-            </button>
-          ))}
+    <div className="flex flex-col gap-10 bg-white rounded-t-3xl text-grayish-cyan text-left p-8 text-xl font-bold md:flex-row md:rounded-3xl">
+      <div className="flex flex-col gap-10 md:w-1/2">
+        <div className="flex flex-col relative gap-4">
+          <label>Bill</label>
+          <Image
+            alt=""
+            src={dollar}
+            width={30}
+            className="absolute inset-y-12 left-0 pl-2 py-3 flex items-center text-grayish-cyan"
+          />
           <input
             type="number"
-            placeholder="Custom"
-            className="text-dark-cyan bg-very-light-grayish-cyan rounded-lg text-center"
-            onChange={handleCustomTipChange}
-            value={customTip}
+            placeholder="0"
+            className="bg-very-light-grayish-cyan p-4 text-dark-cyan text-right text-2xl rounded-md"
+            onChange={handleBillChange}
+          />
+        </div>
+        <div className="flex flex-col relative gap-4">
+          <label>Select Tip %</label>
+          <div className="grid grid-cols-2 gap-6 text-2xl">
+            {[5, 10, 15, 25, 50].map((tipPercentage) => (
+              <button
+                key={tipPercentage}
+                onClick={() => handleTipButtonClick(tipPercentage)}
+                className={`px-4 py-4 rounded-lg text-white ${
+                  selectedTipPercentage === tipPercentage
+                    ? "bg-strong-cyan text-dark-cyan"
+                    : "bg-dark-cyan  "
+                }  hover:bg-strong-cyan `}
+              >
+                {tipPercentage}%
+              </button>
+            ))}
+            <input
+              type="number"
+              placeholder="Custom"
+              className="text-dark-cyan bg-very-light-grayish-cyan rounded-lg text-center"
+              onChange={handleCustomTipChange}
+              value={customTip}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col relative gap-4">
+          <label>Number of People</label>
+          <Image
+            alt=""
+            src={person}
+            width={30}
+            className="absolute inset-y-12 left-0 pl-2 py-3 flex items-center text-grayish-cyan"
+          />
+          <input
+            type="number"
+            placeholder="1"
+            className="bg-very-light-grayish-cyan p-4 text-dark-cyan text-right text-2xl rounded-md"
+            onChange={handlePeopleChange}
           />
         </div>
       </div>
-      <div className="flex flex-col relative gap-4">
-        <label>Number of People</label>
-        <Image
-          alt=""
-          src={person}
-          width={30}
-          className="absolute inset-y-12 left-0 pl-2 py-3 flex items-center text-grayish-cyan"
-        />
-        <input
-          type="number"
-          placeholder="1"
-          className="bg-very-light-grayish-cyan p-4 text-dark-cyan text-right text-2xl rounded-md"
-          onChange={handlePeopleChange}
-        />
-      </div>
-      <div className="flex flex-col bg-dark-cyan rounded-xl p-6 gap-4">
-        <div className="flex flex-row justify-between">
-          <section className="flex flex-col">
-            <span className="text-white">Tip Amount</span>
-            <span className="text-sm">/ person</span>
-          </section>
-          <span className="text-strong-cyan text-2xl">
-            ${tipAmount.toFixed(2)}
-          </span>
-        </div>
-        <div className="flex flex-row justify-between">
-          <section className="flex flex-col">
-            <span className="text-white">Total</span>
-            <span className="text-sm">/ person</span>
-          </section>
-          <span className="text-strong-cyan text-2xl">${total.toFixed(2)}</span>
+
+      <div className="flex flex-col bg-dark-cyan rounded-xl p-6 gap-6 md:w-1/2 md:justify-between">
+        <div className="flex flex-col gap-6 md:gap-20 md:mt-[20%]">
+          <div className="flex flex-row justify-between">
+            <section className="flex flex-col">
+              <span className="text-white">Tip Amount</span>
+              <span className="text-sm">/ person</span>
+            </section>
+            <span className="text-strong-cyan text-2xl md:text-[4rem]">
+              ${tipAmount.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex flex-row justify-between">
+            <section className="flex flex-col">
+              <span className="text-white">Total</span>
+              <span className="text-sm">/ person</span>
+            </section>
+            <span className="text-strong-cyan text-2xl md:text-[4rem]">
+              ${total.toFixed(2)}
+            </span>
+          </div>
         </div>
         <button
           className="px-4 py-4 rounded-lg text-2xl uppercase text-dark-cyan bg-strong-cyan hover:bg-very-light-grayish-cyan hover:text-strong-cyan"
